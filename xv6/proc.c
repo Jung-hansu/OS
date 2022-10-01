@@ -538,7 +538,7 @@ procdump(void)
 int
 forknexec(const char *path, const char **args)
 {
-		//fork//
+		//////fork//////
 	int i, pid;
 	struct proc *np;
 	struct proc *curproc = myproc();
@@ -570,7 +570,7 @@ forknexec(const char *path, const char **args)
 
 	pid = np->pid;
 
-		//exec//
+		//////exec//////
 	char *s, *last;
 	int off;
 	uint argc, sz, sp, ustack[3+MAXARG+1];
