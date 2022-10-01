@@ -11,7 +11,6 @@ UPROGS부분에 hello.c 추가
 시스템 콜 forknexec를 테스트하는 프로그램
 
 - Makefile
-OBJS부분에 forknexec.o 추가
 UPROGS부분에 forknexec.c 추가
 
 - syscall.c
