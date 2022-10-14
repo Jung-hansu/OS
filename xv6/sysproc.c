@@ -97,8 +97,9 @@ sys_forknexec(void)
 	int i;
 	uint uargs, uarg;
 
-	if (argstr(0, &path) < 0 || argint(1, (int*)&uargs) < 0)
+	if(argstr(0, &path) < 0 || argint(1, (int*)&uargs) < 0){
 		return -1;
+  }
 	memset(args, 0, sizeof(args));
 	for(i=0;; i++){
 		if(i >= NELEM(args))

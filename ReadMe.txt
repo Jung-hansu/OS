@@ -11,7 +11,7 @@ UPROGS부분에 hello.c 추가
 시스템 콜 forknexec를 테스트하는 프로그램
 
 - Makefile
-UPROGS부분에 forknexec.c 추가
+UPROGS부분에 forknexectest.c 추가
 
 - syscall.c
 sys_forknexec 래핑함수 extern 및 system call 추가

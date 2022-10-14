@@ -120,7 +120,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-int		forknexec(const char*, const char**);
+int		        forknexec(const char*, const char**);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
