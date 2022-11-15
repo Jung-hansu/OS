@@ -89,6 +89,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = 5;
+  p->cnt = 0;
 
   release(&ptable.lock);
 
@@ -199,6 +201,7 @@ fork(void)
   }
   np->sz = curproc->sz;
   np->parent = curproc;
+  np->priority = curproc->priority;
   *np->tf = *curproc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
@@ -324,33 +327,48 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *minp;
   struct cpu *c = mycpu();
   c->proc = 0;
   
   for(;;){
+    minp = 0;
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){                 ///////////////////20181295
+      if(p->state == RUNNABLE){
+        if (minp && minp->cnt % 3 + 1 > 3){
+          sleep(minp, &ptable.lock);//////??? think again///is there another sleep()??
+        }
+        else if(!minp || minp->priority > p->priority)
+          minp = p;
+      }
+    }
+    if (!minp){                                                         ///////////////////20181295
+      release(&ptable.lock);
+      continue;
+    }
+
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+    c->proc = minp;
+    switchuvm(minp);
+    minp->state = RUNNING;
+    minp->cnt++;                                                        ///////////////////20181295
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+    swtch(&(c->scheduler), minp->context);
+    switchkvm();
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
+
     release(&ptable.lock);
 
   }
@@ -681,4 +699,33 @@ forknexec(const char *path, const char **args)
     end_op();
   }
   return -2;
+}
+
+int
+set_proc_priority(int pid, int priority)
+{
+  struct proc *p;
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (p->pid == pid){
+      p->priority = priority;
+      return p->pid;
+    }
+  return -1;
+}
+
+int
+get_proc_priority(int pid){
+  struct proc *p;
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)                  ///////////////////20181295 stasrvation test
+    if (p->state == RUNNABLE)
+      cprintf("pid %d => cnt : %d\n", p->pid, p->cnt);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (p->pid == pid){
+      cprintf("priority of %d : %d\n\n", p->pid, p->priority);
+      return p->priority;
+    }
+  return -1;
 }
