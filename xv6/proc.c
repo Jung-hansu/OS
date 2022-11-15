@@ -89,8 +89,9 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-  p->priority = 5;
-  p->cnt = 0;
+  p->priority = 5;                  //20181295 initialize priority
+  p->cnt = 0;                       //20181295 initialize cnt
+  p->wait_cnt = 0;                  //20181295 initialize wait_cnt
 
   release(&ptable.lock);
 
@@ -201,7 +202,7 @@ fork(void)
   }
   np->sz = curproc->sz;
   np->parent = curproc;
-  np->priority = curproc->priority;
+  np->priority = curproc->priority;                       //20181295 copy priority
   *np->tf = *curproc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
@@ -327,7 +328,7 @@ void
 scheduler(void)
 {
   struct proc *p;
-  struct proc *minp;
+  struct proc *minp;    //20181295 process of highest priority
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -339,16 +340,22 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){                 ///////////////////20181295
+    //20181295 priority scheduling algorithm
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE){
-        if (minp && minp->cnt % 3 + 1 > 3){
-          sleep(minp, &ptable.lock);//////??? think again///is there another sleep()??
-        }
-        else if(!minp || minp->priority > p->priority)
+        // if (p->wait_cnt >= 3)      //20181295 proc.h 구조체에서 cnt, wait_cnt 지우기
+        //   p->wait_cnt = 0;
+        // if (minp && p->cnt % 3 == 2)
+        //   p->wait_cnt++;
+        if(!minp || minp->priority > p->priority)
           minp = p;
+        else if (minp->priority == p->priority)
+          minp = (minp->cnt < p->cnt ? minp : p);
       }
     }
-    if (!minp){                                                         ///////////////////20181295
+    
+    //20181295 If minp == NULL, reschedule.
+    if (!minp){
       release(&ptable.lock);
       continue;
     }
@@ -360,7 +367,7 @@ scheduler(void)
     c->proc = minp;
     switchuvm(minp);
     minp->state = RUNNING;
-    minp->cnt++;                                                        ///////////////////20181295
+    minp->cnt++;                                               //20181295 increase cnt when the process is called by scheduler
 
     swtch(&(c->scheduler), minp->context);
     switchkvm();
@@ -721,10 +728,10 @@ get_proc_priority(int pid){
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)                  ///////////////////20181295 stasrvation test
     if (p->state == RUNNABLE)
       cprintf("pid %d => cnt : %d\n", p->pid, p->cnt);
-
+  cprintf("\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->pid == pid){
-      cprintf("priority of %d : %d\n\n", p->pid, p->priority);
+      // cprintf("priority of %d : %d\n\n", p->pid, p->priority);
       return p->priority;
     }
   return -1;

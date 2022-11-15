@@ -6,20 +6,14 @@ void child_test(int priority){
 
     if (pid > 0){
         set_proc_priority(getpid(), 3);
-        while(1){
-            get_proc_priority(getpid());
-            sleep(5);
-        }
+        get_proc_priority(getpid());
     }
     else if (pid == 0){
-        while (1){
-            get_proc_priority(getpid());
-            sleep(5);
-        }
+        get_proc_priority(getpid());
         exit();
     }
     else{
-        printf(1, "error\n");
+        printf(2, "fork error\n");
         exit();
     }
     wait();
@@ -28,7 +22,7 @@ void child_test(int priority){
 
 void starvation_test(){
     int N, n, pid;
-    N = 20;
+    N = 50;
 
     printf(1, "starvation test\n");
 
@@ -37,21 +31,19 @@ void starvation_test(){
         if(pid < 0)
             break;
         if(pid == 0){
-            // set_proc_priority(getpid(), n % 10);
             while(1){
                 get_proc_priority(getpid());
                 sleep(5);
             }
             exit();
         }
-        sleep(5);
     }
 
     if(n == N){
         printf(1, "fork claimed to work N times!\n", N);
     }
 
-    for(n=0; n<N; n++){
+    for(; n > 0; n--){
         if(wait() < 0){
             printf(1, "wait stopped early\n");
             exit();
