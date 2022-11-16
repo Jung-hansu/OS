@@ -91,7 +91,6 @@ found:
   p->pid = nextpid++;
   p->priority = 5;                  //20181295 initialize priority
   p->cnt = 0;                       //20181295 initialize cnt
-  p->wait_cnt = 0;                  //20181295 initialize wait_cnt
 
   release(&ptable.lock);
 
@@ -333,7 +332,6 @@ scheduler(void)
   c->proc = 0;
   
   for(;;){
-    minp = 0;
     // Enable interrupts on this processor.
     sti();
 
@@ -341,12 +339,9 @@ scheduler(void)
     acquire(&ptable.lock);
 
     //20181295 priority scheduling algorithm
+    minp = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE){
-        // if (p->wait_cnt >= 3)      //20181295 proc.h 구조체에서 cnt, wait_cnt 지우기
-        //   p->wait_cnt = 0;
-        // if (minp && p->cnt % 3 == 2)
-        //   p->wait_cnt++;
         if(!minp || minp->priority > p->priority)
           minp = p;
         else if (minp->priority == p->priority)
@@ -360,14 +355,14 @@ scheduler(void)
       continue;
     }
 
-
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
     c->proc = minp;
     switchuvm(minp);
     minp->state = RUNNING;
-    minp->cnt++;                                               //20181295 increase cnt when the process is called by scheduler
+    minp->cnt++;  //20181295 increase cnt when the process is called by scheduler
+    if ((minp->priority += minp->cnt / 30) > 10) minp->priority = 10;  //20181295 increase priority if process was called a lot
 
     swtch(&(c->scheduler), minp->context);
     switchkvm();
@@ -725,14 +720,22 @@ int
 get_proc_priority(int pid){
   struct proc *p;
 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)                  ///////////////////20181295 stasrvation test
-    if (p->state == RUNNABLE)
-      cprintf("pid %d => cnt : %d\n", p->pid, p->cnt);
-  cprintf("\n");
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if (p->pid == pid){
-      // cprintf("priority of %d : %d\n\n", p->pid, p->priority);
+      cprintf("pid %d => priority: %d\n", p->pid, p->priority);
       return p->priority;
     }
   return -1;
+}
+
+//20181295 print cnts of all RUNNABLE process in ptable
+int
+get_proc_cnt(int pid){
+  struct proc *p;
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (p->state == RUNNABLE)
+      cprintf("pid %d => cnt : %d\n", p->pid, p->cnt);
+  cprintf("\n");
+  return p->cnt;
 }

@@ -123,6 +123,7 @@ void            yield(void);
 int		        forknexec(const char*, const char**);
 int             set_proc_priority(int, int);
 int             get_proc_priority(int);
+int             get_proc_cnt(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

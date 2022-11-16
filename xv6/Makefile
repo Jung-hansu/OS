@@ -183,7 +183,7 @@ UPROGS=\
 	_zombie\
 	_hello\
 	_forknexectest\
-	_schtest\
+	_starvtest\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

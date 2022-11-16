@@ -90,6 +90,7 @@ sys_uptime(void)
   return xticks;
 }
 
+//20181295 hw2
 int
 sys_forknexec(void)
 {
@@ -116,6 +117,8 @@ sys_forknexec(void)
 	return forknexec((const char *)path, (const char **)args);
 }
 
+
+//20181295 hw3
 int
 sys_set_proc_priority(void)
 {
@@ -134,4 +137,14 @@ sys_get_proc_priority(void)
   if (argint(0, &pid) < 0)
     return -1;
   return get_proc_priority(pid);
+}
+
+int
+sys_get_proc_cnt(void)
+{
+  int pid;
+
+  if (argint(0, &pid) < 0)
+    return -1;
+  return get_proc_cnt(pid);
 }
