@@ -717,7 +717,8 @@ set_proc_priority(int pid, int priority)
 }
 
 int
-get_proc_priority(int pid){
+get_proc_priority(int pid)
+{
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
@@ -730,7 +731,8 @@ get_proc_priority(int pid){
 
 //20181295 print cnts of all RUNNABLE process in ptable
 int
-get_proc_cnt(int pid){
+get_proc_cnt(int pid)
+{
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)

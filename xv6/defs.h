@@ -64,10 +64,15 @@ extern uchar    ioapicid;
 void            ioapicinit(void);
 
 // kalloc.c
+uint            get_refcount(uint);     //20181295 hw4
+void            inc_refcount(uint);     //20181295 hw4
+void            dec_refcount(uint);     //20181295 hw4
+int             getNumFreePages(void);  //20181295 hw4
 char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
+
 
 // kbd.c
 void            kbdintr(void);
@@ -185,6 +190,7 @@ void            freevm(pde_t*);
 void            inituvm(pde_t*, char*, uint);
 int             loaduvm(pde_t*, char*, struct inode*, uint, uint);
 pde_t*          copyuvm(pde_t*, uint);
+void            pagefault(void);    //20181295 hw4
 void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);

@@ -27,6 +27,7 @@ int forknexec(const char*, const char**);
 int set_proc_priority(int pid, int priority);
 int get_proc_priority(int pid);
 int get_proc_cnt(int pid);
+uint getNumFreePages(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

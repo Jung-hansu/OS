@@ -148,3 +148,10 @@ sys_get_proc_cnt(void)
     return -1;
   return get_proc_cnt(pid);
 }
+
+//20181295 hw4
+int
+sys_getNumFreePages(void)
+{
+  return getNumFreePages();
+}
